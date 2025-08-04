@@ -1,7 +1,5 @@
 # deep-learning-study
 
-3주 동안 딥러닝 & NLP를 학습한 내용을 정리한 저장소입니다.
-
 ## 📅 학습 계획
 - Week 1: 딥러닝 기본기 + PyTorch
 - Week 2: NLP 기초 (Word2Vec, RNN, LSTM)
