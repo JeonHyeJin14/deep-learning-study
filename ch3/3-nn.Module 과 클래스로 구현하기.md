@@ -247,5 +247,78 @@ for epoch in range(nb_epochs+1):
 6. 학습이 100번 진행될 때마다 현재 Epoch 번호와 비용을 출력해 학습 과정이 어떻게 진행되고 잇는지 확인 가능
 7. 로그는 학습 중에 ㅁ도ㅔㄹ의 성능이 어떻게 변화하는지를 보여주는 지표가 된다.
 
+# 5. 다중 선형 회귀 클래스로 구현하기
+
+```python
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+torch.manual_seed(1)
+
+# 데이터
+x_train = torch.FloatTensor([[73, 80, 75],
+                             [93, 88, 93],
+                             [89, 91, 90],
+                             [96, 98, 100],
+                             [73, 66, 70]])
+y_train = torch.FloatTensor([[152], [185], [180], [196], [142]])
+
+class MultivariateLinearRegressionModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.linear = nn.Linear(3, 1) # 다중 선형 회귀이므로 input_dim=3, output_dim=1.
+
+    def forward(self, x):
+        return self.linear(x)
+
+model = MultivariateLinearRegressionModel()
+
+optimizer = torch.optim.SGD(model.parameters(), lr=1e-5) 
+
+```
+
+단순 선형 회귀 구현 코드에서 입력 차원만 바뀜
+
+SGD 옵티마이저를 설정함
+
+```python
+nb_epochs = 2000
+for epoch in range(nb_epochs+1):
+
+    # H(x) 계산
+    prediction = model(x_train)
+    # model(x_train)은 model.forward(x_train)와 동일함.
+
+    # cost 계산
+    cost = F.mse_loss(prediction, y_train) # <== 파이토치에서 제공하는 평균 제곱 오차 함수
+
+    # cost로 H(x) 개선하는 부분
+    # gradient를 0으로 초기화
+    optimizer.zero_grad()
+    # 비용 함수를 미분하여 gradient 계산
+    cost.backward()
+    # W와 b를 업데이트
+    optimizer.step()
+
+    if epoch % 100 == 0:
+    # 100번마다 로그 출력
+      print('Epoch {:4d}/{} Cost: {:.6f}'.format(
+          epoch, nb_epochs, cost.item()
+      ))
+```
+
+1. 학습은 모델이 주어진 입력 데이터를 사용해 예측값을 계산
+- 예측값 = 출력 , mosel(x_train)을 호출해 계산됨 -> 모델의 foward 메서드를 호출하는 것과 동일한 동작
+
+2. 예측값이 계산된 후 , 이 값과 실제 목표값 y_train 간의 차이를 계산하는데, 이 차이를 손실 또는 비용이라고 함
+- 파이토치의 F.mse_loss() 함수를 사용해 평균 제곱 오차를 계산한다.
+- 이 비용은 모델이 얼마나 잘못 예측했는지를 나타냄
+
+3. 모델이 비용을 줄이도록 학습하기 위해서 옵티마이저의 기울기 값을 초기화하고 비용 함수를 기준으로 기울기를 계산해 업데이트 함
+- 이 과정은 비용 하수를 모델 파라미터에 대해 미분한 후, 옵티마이저가 이를 사용해서 파라미터를 조정하는 방식으로 이루어짐
+
+4. 이 과정은 설정한 횟수만큼 반복되며, 모델은 점차 더 정확한 예측을 하도록 학습
 
 
